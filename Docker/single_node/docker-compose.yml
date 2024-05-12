@@ -1,0 +1,37 @@
+version: '3.4'
+services:
+  crawlab:
+    image: crawlabteam/crawlab
+    container_name: crawlab_master
+    restart: always
+    environment:
+      CRAWLAB_NODE_MASTER: "Y"
+      CRAWLAB_MONGO_HOST: "mongo"
+      CRAWLAB_MONGO_PORT: "27017"
+      CRAWLAB_MONGO_DB: "crawlab"
+      CRAWLAB_MONGO_USERNAME: "username"
+      CRAWLAB_MONGO_PASSWORD: "password"
+    volumes:
+      - "/var/.crawlab/master:/root/.crawlab"  # persistent crawlab metadata
+      - "/var/crawlab/master:/data"  # persistent crawlab data
+      - "/var/crawlab/log:/var/log/crawlab"  # persistent crawlab logs
+    ports:
+      - "8080:8080"  # exposed grpc port
+    logging:
+      options:
+        max-size: "10g"
+        max-file: "5"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:4.2
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "username"  # mongo username
+      MONGO_INITDB_ROOT_PASSWORD: "password"  # mongo password
+    volumes:
+      - "/var/.crawlab/master:/root/.crawlab"  # persistent crawlab metadata
+      - "/var/crawlab/mongo/data/db:/data/db"  # persistent mongo data
+    ports:
+      - "27017:27017"  # expose mongo port to host machine
